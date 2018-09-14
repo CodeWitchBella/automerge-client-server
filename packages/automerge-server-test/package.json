@@ -5,7 +5,7 @@
   "description": "This is only here to test automerge-server. It does not get published to npm.",
   "main": "index.js",
   "scripts": {
-    "watch": "nodemon index.js"    
+    "watch": "nodemon index.js"
   },
   "repository": {
     "type": "git",
