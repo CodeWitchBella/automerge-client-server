@@ -3,9 +3,7 @@
   "version": "0.0.1",
   "description": "Websocket server for automerge",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
+  "module": "main.js",
   "repository": {
     "type": "git",
     "url": "git+https://gitlab.com/isabella.skorepova/automerge-client-server.git"
@@ -15,5 +13,11 @@
   "bugs": {
     "url": "https://gitlab.com/isabella.skorepova/automerge-client-server/issues"
   },
-  "homepage": "https://gitlab.com/isabella.skorepova/automerge-client-server#readme"
+  "homepage": "https://gitlab.com/isabella.skorepova/automerge-client-server#readme",
+  "dependencies": {
+    "esm": "^3.0.82"
+  },
+  "peerDependencies": {
+    "automerge": "^0.8.0"
+  }
 }

@@ -1,9 +1,12 @@
 {
-  "name": "automerge-client",
+  "name": "automerge-server-test",
   "version": "0.0.1",
-  "description": "Client for automerge-server",
+  "private": true,
+  "description": "This is only here to test automerge-server. It does not get published to npm.",
   "main": "index.js",
-  "module": "main.js",
+  "scripts": {
+    "watch": "nodemon index.js"    
+  },
   "repository": {
     "type": "git",
     "url": "git+https://gitlab.com/isabella.skorepova/automerge-client-server.git"
@@ -16,6 +19,10 @@
   "homepage": "https://gitlab.com/isabella.skorepova/automerge-client-server#readme",
   "dependencies": {
     "automerge": "^0.8.0",
-    "esm": "^3.0.82"
+    "automerge-server": "file:../automerge-server",
+    "ws": "^6.0.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.4"
   }
 }
