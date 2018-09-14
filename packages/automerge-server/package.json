@@ -1,0 +1,19 @@
+{
+  "name": "automerge-server",
+  "version": "0.0.1",
+  "description": "Websocket server for automerge",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://gitlab.com/isabella.skorepova/automerge-client-server.git"
+  },
+  "author": "Isabella Skořepová <isabella@skorepova.info>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://gitlab.com/isabella.skorepova/automerge-client-server/issues"
+  },
+  "homepage": "https://gitlab.com/isabella.skorepova/automerge-client-server#readme"
+}
