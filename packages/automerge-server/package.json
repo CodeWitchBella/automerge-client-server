@@ -15,9 +15,7 @@
   },
   "homepage": "https://gitlab.com/isabella.skorepova/automerge-client-server#readme",
   "dependencies": {
+    "automerge": "^0.8.0",
     "esm": "^3.0.82"
-  },
-  "peerDependencies": {
-    "automerge": "^0.8.0"
   }
 }

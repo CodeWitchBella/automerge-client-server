@@ -19,7 +19,7 @@
   "homepage": "https://gitlab.com/isabella.skorepova/automerge-client-server#readme",
   "dependencies": {
     "automerge": "^0.8.0",
-    "automerge-server": "file:../automerge-server",
+    "automerge-server": "0.0.1",
     "ws": "^6.0.0"
   },
   "devDependencies": {
