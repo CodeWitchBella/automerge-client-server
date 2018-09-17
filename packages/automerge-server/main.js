@@ -110,7 +110,7 @@ export default class AutomergeServer {
   }
 
   onChange(id, doc) {
-    this.saveDocument(id, Automerge.save(doc))
+    this.saveDocument(id, Automerge.save(doc), doc)
   }
 
   getDoc(id) {
