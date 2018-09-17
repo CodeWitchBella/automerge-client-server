@@ -4,11 +4,13 @@ const WebSocket = require('ws')
 const Automerge = require('automerge')
 
 const automergeServer = new AutomergeServer({
-  loadDocument: (id) => {
-    if(id === 'one') {
-      return Promise.resolve(Automerge.change(Automerge.init(), d => {
-        d.prop = 1
-      }))
+  loadDocument: id => {
+    if (id === 'one') {
+      return Promise.resolve(
+        Automerge.change(Automerge.init(), d => {
+          d.prop = 1
+        }),
+      )
     }
 
     return Promise.resolve(false)

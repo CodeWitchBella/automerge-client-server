@@ -55,7 +55,7 @@ class Document {
   }
 
   addToSet(docSet) {
-    if(this.sets.some(set => set.set === docSet)) {
+    if (this.sets.some(set => set.set === docSet)) {
       // prevent adding twice
       return
     }
@@ -64,7 +64,7 @@ class Document {
 
     const handler = (docId, doc) => {
       this.sets.forEach(other => {
-        if(other.set === docSet) return
+        if (other.set === docSet) return
         other.set.setDoc(docId, doc)
       })
     }
@@ -74,7 +74,7 @@ class Document {
 
   removeFromSet(docSet) {
     const set = this.sets.find(set => set.set === docSet)
-    if(!set) return // this doc is not in specified set
+    if (!set) return // this doc is not in specified set
 
     docSet.unregisterHandler(set.handler)
     this.sets = this.sets.filter(set => set.set !== docSet)
@@ -85,11 +85,11 @@ export default class AutomergeServer {
   constructor({
     loadDocument,
     saveDocument,
-    checkAccess = (id, req) => Promise.resolve(true)
+    checkAccess = (id, req) => Promise.resolve(true),
   }) {
-    if(typeof loadDocument !== 'function')
+    if (typeof loadDocument !== 'function')
       throw new Error('loadDocument option must be function')
-    if(typeof saveDocument !== 'function')
+    if (typeof saveDocument !== 'function')
       throw new Error('saveDocument option must be function')
 
     this.loadDocument = loadDocument
@@ -100,25 +100,26 @@ export default class AutomergeServer {
   }
 
   getDoc(id) {
-    if(this.docs[id]) return this.docs[id]
+    if (this.docs[id]) return this.docs[id]
     this.docs[id] = Promise.resolve(this.loadDocument(id))
       .then(doc => {
-        if(doc === false) return false // 404
+        if (doc === false) return false // 404
 
         // ok
-        if(typeof doc === 'string') {
+        if (typeof doc === 'string') {
           // string means loading previously save doc
           return Automerge.load(doc)
         }
-        if(!doc) {
-          // if falsy create new empty document 
+        if (!doc) {
+          // if falsy create new empty document
           return Automerge.init()
         }
         // if not falsy nor string we expect automerge document
         // created via Automerge.init()
         return doc
-      }).then(doc => {
-        if(doc === false) return false // 404
+      })
+      .then(doc => {
+        if (doc === false) return false // 404
         return new Document(id).set(doc)
       })
     return this.docs[id]
@@ -132,21 +133,24 @@ export default class AutomergeServer {
 
     let subscribedDocuments = [] // Document[]
     let subscribingDocuments = [] // { id: string, cancel: boolean }[]
-    const removeFromSubscribedDocuments = (id) => {
+    const removeFromSubscribedDocuments = id => {
       subscribingDocuments = subscribingDocuments.filter(d => d.id !== id)
       subscribedDocuments = subscribedDocuments.filter(d => d.id !== id)
     }
 
     const send = (action, data) =>
-      console.log('sending',action,data) ||
+      console.log('sending', action, data) ||
       ws.send(JSON.stringify({ action, ...data }))
 
-    const autocon = new Automerge.Connection(docSet, (data) => {
+    const autocon = new Automerge.Connection(docSet, data => {
       send('automerge', { data })
     })
 
-    const subscribeToDoc = (id) => {
-      if (subscribingDocuments.some(a => a.id === id) || subscribedDocuments.some(a => a.id === id)) {
+    const subscribeToDoc = id => {
+      if (
+        subscribingDocuments.some(a => a.id === id) ||
+        subscribedDocuments.some(a => a.id === id)
+      ) {
         send('error', {
           message: 'Already subscribed or subscribing',
           id,
@@ -154,53 +158,53 @@ export default class AutomergeServer {
         return
       }
       subscribingDocuments.push({ id, cancel: false })
-      
+
       this.checkAccess(id, req)
-      .then(access => {
-        if(access) {
-          return this.getDoc(id)
-        } else {
-          send('error', {
-            message: 'Access denied',
-            id,
-          })
-          removeFromSubscribedDocuments(id)
-          return null
-        }
-      })
-      .then(doc => {
-        if(doc === null) return
-        if(doc === false) {
-          // 404
-          send('error', {
-            message: 'Document not found',
-            id,
-          })
-          removeFromSubscribedDocuments(id)
-        } else {
-          const { cancel } = subscribingDocuments.find(d => d.id === id)
-          if(!cancel) {
-            doc.addToSet(docSet)
-            subscribedDocuments.push(doc)
-            send('subscribed', { id })
+        .then(access => {
+          if (access) {
+            return this.getDoc(id)
+          } else {
+            send('error', {
+              message: 'Access denied',
+              id,
+            })
+            removeFromSubscribedDocuments(id)
+            return null
           }
-          subscribingDocuments = subscribingDocuments.filter(d => d.id !== id)
-        }
-      })
-      .catch(e => {
-        removeFromSubscribedDocuments(id)
-        send('error', {
-          message: 'Internal server error',
-          id,
         })
-        console.error('Error occurred while checking access for '+id)
-        console.error(e)
-      })
+        .then(doc => {
+          if (doc === null) return
+          if (doc === false) {
+            // 404
+            send('error', {
+              message: 'Document not found',
+              id,
+            })
+            removeFromSubscribedDocuments(id)
+          } else {
+            const { cancel } = subscribingDocuments.find(d => d.id === id)
+            if (!cancel) {
+              doc.addToSet(docSet)
+              subscribedDocuments.push(doc)
+              send('subscribed', { id })
+            }
+            subscribingDocuments = subscribingDocuments.filter(d => d.id !== id)
+          }
+        })
+        .catch(e => {
+          removeFromSubscribedDocuments(id)
+          send('error', {
+            message: 'Internal server error',
+            id,
+          })
+          console.error('Error occurred while checking access for ' + id)
+          console.error(e)
+        })
     }
 
-    const unsubscribe = (id) => {
+    const unsubscribe = id => {
       const subscribing = subscribingDocuments.find(d => d.id === id)
-      if(subscribing) {
+      if (subscribing) {
         subscribing.cancel = true
       } else {
         const subscribed = subscribedDocuments.find(d => d.id === id)
@@ -209,19 +213,19 @@ export default class AutomergeServer {
       }
     }
 
-    const handleFrame = (frame) => {
+    const handleFrame = frame => {
       console.log('handling', frame)
-      if(frame.action === 'automerge') {
+      if (frame.action === 'automerge') {
         autocon.receiveMsg(frame.data)
-      } else if(frame.action === 'error') {
+      } else if (frame.action === 'error') {
         console.error('Recieved error frame from client', frame)
-      } else if(frame.action === 'subscribe') {
+      } else if (frame.action === 'subscribe') {
         frame.ids.forEach(id => subscribeToDoc(id))
-      } else if(frame.action === 'unsubscribe') {
+      } else if (frame.action === 'unsubscribe') {
         frame.ids.forEach(id => unsubscribe(id))
       } else {
         send('error', {
-          message: 'Unknown action '+frame.action
+          message: 'Unknown action ' + frame.action,
         })
       }
     }
@@ -229,10 +233,10 @@ export default class AutomergeServer {
     ws.on('message', message => {
       try {
         const frame = JSON.parse(message.toString())
-        if(typeof frame === 'object' && frame !== null) {
+        if (typeof frame === 'object' && frame !== null) {
           handleFrame(frame)
         }
-      } catch(e) {
+      } catch (e) {
         console.error(e)
       }
     })

@@ -11,28 +11,28 @@ socket.addEventListener('close', () => {
 })
 
 const client = new AutomergeClient({
-  socket
+  socket,
 })
 
 const rl = readline.createInterface({
   input: process.stdin,
-  output: process.stdout
+  output: process.stdout,
 })
 
 function handleLine() {
-  rl.question('automerge> ', (line) => {
-    const [ cmd, ...args ] = line.trim().split(/ +/)
+  rl.question('automerge> ', line => {
+    const [cmd, ...args] = line.trim().split(/ +/)
     console.log(cmd, args)
-    if(cmd === 'subscribe' || cmd === 's') {
+    if (cmd === 'subscribe' || cmd === 's') {
       subscribe(args)
-    } else if(['c', 'ch', 'change'].includes(cmd)) {
+    } else if (['c', 'ch', 'change'].includes(cmd)) {
       change(args)
     } else {
-      console.error('Unknown command "'+cmd+'"')
+      console.error('Unknown command "' + cmd + '"')
     }
-  
+
     handleLine()
-  });
+  })
 }
 handleLine()
 
@@ -42,7 +42,10 @@ function subscribe(args) {
 
 function change(args) {
   const id = args[0]
-  client.docSet.setDoc(id, Automerge.change(client.docSet.getDoc(id), doc => {
-    doc[args[1]] = args[2]
-  }))
+  client.docSet.setDoc(
+    id,
+    Automerge.change(client.docSet.getDoc(id), doc => {
+      doc[args[1]] = args[2]
+    }),
+  )
 }
