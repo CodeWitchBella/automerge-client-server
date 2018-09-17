@@ -31,7 +31,7 @@ function doLoad(string) {
   if (!string) return {}
   const docs = JSON.parse(string)
   const ret = {}
-  for (const [k, v] of docs) {
+  for (const [k, v] of Object.entries(docs)) {
     ret[k] = Automerge.load(v)
   }
   return ret
