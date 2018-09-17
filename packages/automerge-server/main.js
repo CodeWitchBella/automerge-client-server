@@ -63,10 +63,14 @@ class Document {
     docSet.setDoc(this.id, this.doc)
 
     const handler = (docId, doc) => {
-      this.sets.forEach(other => {
-        if (other.set === docSet) return
+      console.log('handler', docId, doc)
+      if (docId !== this.id) return // not this doc
+      if (doc === this.doc) return // already handled
+      this.doc = doc
+      for (const other of this.sets) {
+        if (other.set === docSet) continue
         other.set.setDoc(docId, doc)
-      })
+      }
     }
     docSet.registerHandler(handler)
     this.sets.push({ set: docSet, handler })
