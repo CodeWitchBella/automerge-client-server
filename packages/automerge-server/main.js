@@ -41,13 +41,16 @@ Sent after successful subscription. Contains id field as doc identifier.
 */
 
 class Document {
-  constructor(id) {
+  constructor(id, onChange) {
     this.sets = [] // { set, handler }
     this.id = id
+    this.onChange = onChange
   }
 
   set(doc) {
     this.doc = doc
+    this.onChange(this.id, this.doc)
+
     for (const set of this.sets) {
       set.setDoc(this.id, this.doc)
     }
@@ -67,6 +70,8 @@ class Document {
       if (docId !== this.id) return // not this doc
       if (doc === this.doc) return // already handled
       this.doc = doc
+      this.onChange(this.id, this.doc)
+
       for (const other of this.sets) {
         if (other.set === docSet) continue
         other.set.setDoc(docId, doc)
@@ -101,6 +106,11 @@ export default class AutomergeServer {
     this.checkAccess = checkAccess
 
     this.docs = {}
+    this.onChange = this.onChange.bind(this)
+  }
+
+  onChange(id, doc) {
+    this.saveDocument(id, Automerge.save(doc))
   }
 
   getDoc(id) {
@@ -116,7 +126,9 @@ export default class AutomergeServer {
         }
         if (!doc) {
           // if falsy create new empty document
-          return Automerge.init()
+          return Automerge.change(Automerge.init(), doc => {
+            doc.docId = id
+          })
         }
         // if not falsy nor string we expect automerge document
         // created via Automerge.init()
@@ -124,7 +136,7 @@ export default class AutomergeServer {
       })
       .then(doc => {
         if (doc === false) return false // 404
-        return new Document(id).set(doc)
+        return new Document(id, this.onChange).set(doc)
       })
     return this.docs[id]
   }
@@ -217,10 +229,21 @@ export default class AutomergeServer {
       }
     }
 
+    const automergeMessage = data => {
+      console.log(data)
+      if (subscribedDocuments.some(doc => doc.id === data.docId)) {
+        autocon.receiveMsg(data)
+      } else {
+        send('error', {
+          message: 'Sending changes to doc which you are not subscribed to',
+        })
+      }
+    }
+
     const handleFrame = frame => {
       console.log('handling', frame)
       if (frame.action === 'automerge') {
-        autocon.receiveMsg(frame.data)
+        automergeMessage(frame.data)
       } else if (frame.action === 'error') {
         console.error('Recieved error frame from client', frame)
       } else if (frame.action === 'subscribe') {
