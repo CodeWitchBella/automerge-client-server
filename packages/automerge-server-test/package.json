@@ -1,6 +1,6 @@
 {
   "name": "automerge-server-test",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "private": true,
   "description": "This is only here to test automerge-server. It does not get published to npm.",
   "main": "index.js",
@@ -19,7 +19,7 @@
   "homepage": "https://gitlab.com/isabella.skorepova/automerge-client-server#readme",
   "dependencies": {
     "automerge": "^0.8.0",
-    "automerge-server": "^0.0.4",
+    "automerge-server": "^0.0.5",
     "ws": "^6.0.0"
   },
   "devDependencies": {

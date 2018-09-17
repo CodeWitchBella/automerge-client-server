@@ -1,6 +1,6 @@
 {
   "name": "automerge-server",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Websocket server for automerge",
   "main": "index.js",
   "module": "main.js",
