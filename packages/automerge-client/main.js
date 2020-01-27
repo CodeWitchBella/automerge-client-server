@@ -44,6 +44,7 @@ export default class AutomergeClient {
     this.socket = socket
     this.save = save
     this.docs = doLoad(savedData)
+    this.pausedDocs = []
     this.onChange = onChange || (() => {})
     this.subscribeList = []
 
@@ -114,6 +115,10 @@ export default class AutomergeClient {
       return false
     }
     this.docs[id] = Automerge.change(this.docs[id], changer)
+    if(this.pausedDocs.includes(id)){
+      // trying to update the docset of a document on pause. Shouldn't propagate to server.
+      return true
+    }
     if (this.docSet) {
       this.docSet.setDoc(id, this.docs[id])
     }
@@ -145,5 +150,30 @@ export default class AutomergeClient {
         JSON.stringify({ action: 'unsubscribe', ids: ids.filter(unique) }),
       )
     }
+  }
+
+  pause(ids){
+    if(ids.length <= 0) return 
+    this.pausedDocs = this.pausedDocs.concat(ids).filter(unique)
+  }
+
+  resume(ids){
+    if(ids.length <=0 ) return 
+
+    //if the document is part of pausedDocs
+    this.pausedDocs = this.pausedDocs.filter((value,index) => {
+      return ids.indexOf(value) == -1
+    })
+
+    for(i=0; i<ids.length; i++){
+
+      if(!this.docSet.getDoc(ids[i])){
+        console.log("You cannot resume this document. It is not part of the docSet.")
+        return false
+      }
+      let currentDocument = ids[i]
+      this.docSet.setDoc(currentDocument, this.docs[currentDocument])
+    }
+
   }
 }
