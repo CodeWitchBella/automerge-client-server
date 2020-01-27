@@ -131,4 +131,19 @@ export default class AutomergeClient {
       )
     }
   }
+
+  unsubscribe(ids) {
+    if (ids.length <= 0) return
+    
+    this.subscribeList = this.subscribeList.filter((value,index) => {
+      return ids.indexOf(value) == -1
+    })
+    
+    if (this.socket.readyState === 1) {
+      // OPEN
+      this.socket.send(
+        JSON.stringify({ action: 'unsubscribe', ids: ids.filter(unique) }),
+      )
+    }
+  }
 }
